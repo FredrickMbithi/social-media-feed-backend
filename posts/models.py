@@ -60,7 +60,7 @@ class Interaction(models.Model):
     
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='interactions')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    interaction_type = models.CharField(max_choices=20, choices=INTERACTION_TYPES)
+    interaction_type = models.CharField(max_length=20, choices=INTERACTION_TYPES)
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
