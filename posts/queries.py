@@ -1,6 +1,6 @@
 import graphene
 from graphene import relay
-from django.db.models import Q, Prefetch
+from django.db.models import Q, Prefetch, Case, When
 from .types import PostType, CommentType
 from .models import Post, Comment
 from .cache_utils import CacheManager, cache_post_data
@@ -26,13 +26,13 @@ class Query(graphene.ObjectType):
         # Try cache first
         cached = CacheManager.get_posts_list(page, per_page, user_id, search)
         if cached:
-            # Return cached post IDs and fetch fresh data
             post_ids = cached
-            return Post.objects.filter(id__in=post_ids).select_related(
-                'author'
-            ).prefetch_related(
-                Prefetch('comments', queryset=Comment.objects.select_related('author')[:5])
-            )
+            # Preserve order using CASE WHEN
+            preserved_order = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(post_ids)])
+            return Post.objects.filter(id__in=post_ids)\
+                .select_related('author')\
+                .prefetch_related(Prefetch('comments', queryset=Comment.objects.select_related('author').order_by('-created_at')))\
+                .order_by(preserved_order)
         
         # Build optimized query
         qs = Post.objects.select_related('author').prefetch_related(
@@ -94,7 +94,8 @@ class Query(graphene.ObjectType):
         cached = CacheManager.get_user_posts(user_id)
         if cached:
             post_ids = cached
-            return Post.objects.filter(id__in=post_ids).select_related('author')
+            preserved_order = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(post_ids)])
+            return Post.objects.filter(id__in=post_ids).select_related('author').order_by(preserved_order)
         
         posts = list(
             Post.objects.filter(author_id=user_id)
