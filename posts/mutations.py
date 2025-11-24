@@ -4,6 +4,7 @@ from django.db.models import F
 from .models import Post, Comment, Interaction
 from .types import PostType, CommentType
 from .cache_utils import CacheManager
+from .decorators import rate_limit
 
 
 class CreatePost(graphene.Mutation):
@@ -15,6 +16,7 @@ class CreatePost(graphene.Mutation):
         image_url = graphene.String()
     
     @login_required
+    @rate_limit(group='create_post', rate='5/m')  # 5 posts per minute
     def mutate(self, info, content, image_url=None):
         user = info.context.user
         
@@ -119,6 +121,7 @@ class CreateComment(graphene.Mutation):
         content = graphene.String(required=True)
     
     @login_required
+    @rate_limit(group='create_comment', rate='10/m')  # 10 comments per minute
     def mutate(self, info, post_id, content):
         user = info.context.user
         
@@ -190,6 +193,7 @@ class LikePost(graphene.Mutation):
         post_id = graphene.ID(required=True)
     
     @login_required
+    @rate_limit(group='like_post', rate='20/m')  # 20 likes per minute
     def mutate(self, info, post_id):
         user = info.context.user
         
