@@ -1,14 +1,12 @@
 import graphene
 from graphene import relay
-from graphene_django.filter import DjangoFilterBackend
-from django.db.models import Q
-from .types import PostType, CommentType, UserType
+from django.db.models import Q, Prefetch
+from .types import PostType, CommentType
 from .models import Post, Comment
-from django.contrib.auth.models import User
+from .cache_utils import CacheManager, cache_post_data
 
 
 class Query(graphene.ObjectType):
-    # List all posts with pagination
     posts = graphene.List(
         PostType,
         page=graphene.Int(default_value=1),
@@ -16,32 +14,35 @@ class Query(graphene.ObjectType):
         user_id=graphene.Int(required=False),
         search=graphene.String(required=False)
     )
-    
-    # Single post by ID
     post = graphene.Field(PostType, id=graphene.ID(required=True))
-    
-    # User's posts
-    user_posts = graphene.List(
-        PostType,
-        user_id=graphene.ID(required=True)
-    )
-
-    me = graphene.Field(UserType)
-    user = graphene.Field(UserType, id=graphene.ID(required=True))
+    user_posts = graphene.List(PostType, user_id=graphene.ID(required=True))
+    me = graphene.Field('posts.types.UserType')
+    user = graphene.Field('posts.types.UserType', id=graphene.ID(required=True))
 
     def resolve_posts(self, info, page=1, per_page=10, user_id=None, search=None):
         """
-        Fetch posts with pagination and optional filters
+        Fetch posts with caching and optimized queries
         """
+        # Try cache first
+        cached = CacheManager.get_posts_list(page, per_page, user_id, search)
+        if cached:
+            # Return cached post IDs and fetch fresh data
+            post_ids = cached
+            return Post.objects.filter(id__in=post_ids).select_related(
+                'author'
+            ).prefetch_related(
+                Prefetch('comments', queryset=Comment.objects.select_related('author')[:5])
+            )
+        
+        # Build optimized query
         qs = Post.objects.select_related('author').prefetch_related(
-            'comments__author'
+            Prefetch('comments', queryset=Comment.objects.select_related('author')[:5])
         )
         
-        # Filter by user if provided
+        # Filters
         if user_id:
             qs = qs.filter(author_id=user_id)
         
-        # Search in content
         if search:
             qs = qs.filter(Q(content__icontains=search))
         
@@ -49,26 +50,64 @@ class Query(graphene.ObjectType):
         start = (page - 1) * per_page
         end = start + per_page
         
-        return qs[start:end]
+        posts = list(qs[start:end])
+        
+        # Cache post IDs
+        post_ids = [post.id for post in posts]
+        CacheManager.set_posts_list(post_ids, page, per_page, user_id, search)
+        
+        return posts
 
     def resolve_post(self, info, id):
         """
-        Fetch single post by ID with optimized queries
+        Fetch single post with caching
         """
+        # Try cache first
+        cached = CacheManager.get_post(id)
+        if cached:
+            # Reconstruct from cache (simplified)
+            try:
+                return Post.objects.select_related('author').prefetch_related(
+                    Prefetch('comments', queryset=Comment.objects.select_related('author'))
+                ).get(pk=id)
+            except Post.DoesNotExist:
+                CacheManager.invalidate_post(id)
+                return None
+        
+        # Fetch with optimized query
         try:
-            return Post.objects.select_related('author').prefetch_related(
-                'comments__author',
+            post = Post.objects.select_related('author').prefetch_related(
+                Prefetch('comments', queryset=Comment.objects.select_related('author')),
                 'interactions__user'
             ).get(pk=id)
+            
+            # Cache it
+            CacheManager.set_post(id, cache_post_data(post))
+            return post
         except Post.DoesNotExist:
             return None
 
     def resolve_user_posts(self, info, user_id):
         """
-        Fetch all posts by a specific user
+        Fetch user posts with caching
         """
-        return Post.objects.filter(author_id=user_id).select_related('author')
-
+        cached = CacheManager.get_user_posts(user_id)
+        if cached:
+            post_ids = cached
+            return Post.objects.filter(id__in=post_ids).select_related('author')
+        
+        posts = list(
+            Post.objects.filter(author_id=user_id)
+            .select_related('author')
+            .prefetch_related('comments__author')
+        )
+        
+        # Cache post IDs
+        post_ids = [post.id for post in posts]
+        CacheManager.set_user_posts(user_id, post_ids)
+        
+        return posts
+    
     def resolve_me(self, info):
         """Get current authenticated user"""
         user = info.context.user
@@ -78,6 +117,7 @@ class Query(graphene.ObjectType):
     
     def resolve_user(self, info, id):
         """Get user by ID"""
+        from django.contrib.auth.models import User
         try:
             return User.objects.get(pk=id)
         except User.DoesNotExist:
