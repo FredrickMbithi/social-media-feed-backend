@@ -8,6 +8,8 @@ from .cache_utils import CacheManager
 from .security import SecurityValidator
 from .decorators import rate_limit
 
+# Security: input validation applied to create/update/comment mutations using SecurityValidator
+
 
 class CreatePost(graphene.Mutation):
     """Create a new post"""
