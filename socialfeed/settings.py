@@ -147,7 +147,13 @@ GRAPHENE = {
 }
 
 # CORS Configuration (for GraphQL Playground)
-CORS_ALLOW_ALL_ORIGINS = True  # For development only!
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = os.getenv(
+    'CORS_ALLOWED_ORIGINS',
+    'http://localhost:3000,http://localhost:8000'
+).split(',')
+
+CORS_ALLOW_CREDENTIALS = True
 
 # JWT Authentication
 AUTHENTICATION_BACKENDS = [
