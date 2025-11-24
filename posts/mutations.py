@@ -5,6 +5,7 @@ from django.db import transaction
 from .models import Post, Comment, Interaction
 from .types import PostType, CommentType
 from .cache_utils import CacheManager
+from .security import SecurityValidator
 from .decorators import rate_limit
 
 
@@ -21,11 +22,10 @@ class CreatePost(graphene.Mutation):
     @transaction.atomic
     def mutate(self, info, content, image_url=None):
         user = info.context.user
-        
-        # Validation
-        if not content or len(content.strip()) == 0:
-            raise Exception('Post content cannot be empty')
-        
+        # Validate and sanitize
+        content = SecurityValidator.validate_content(content)
+        image_url = SecurityValidator.validate_url(image_url)
+
         if len(content) > 5000:
             raise Exception('Post content too long (max 5000 characters)')
         
@@ -68,11 +68,14 @@ class UpdatePost(graphene.Mutation):
         
         # Update fields
         if content is not None:
+            # Validate and sanitize
+            content = SecurityValidator.validate_content(content)
             if len(content.strip()) == 0:
                 raise Exception('Post content cannot be empty')
             post.content = content.strip()
-        
+
         if image_url is not None:
+            image_url = SecurityValidator.validate_url(image_url)
             post.image_url = image_url
         
         post.save()
@@ -129,10 +132,8 @@ class CreateComment(graphene.Mutation):
     @transaction.atomic
     def mutate(self, info, post_id, content):
         user = info.context.user
-        
-        # Validation
-        if not content or len(content.strip()) == 0:
-            raise Exception('Comment content cannot be empty')
+        # Validate and sanitize
+        content = SecurityValidator.validate_content(content)
 
         if len(content) > 1000:
             raise Exception('Comment too long (max 1000 characters)')
