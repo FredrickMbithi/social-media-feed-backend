@@ -32,11 +32,49 @@ python manage.py seed_data
 python manage.py runserver
 ```
 
+## Authentication
+
+All mutations require JWT authentication. Include the token in headers:
+
+```json
+{
+  "Authorization": "JWT your-token-here"
+}
+```
+
+### Register & Login
+
+**Register:**
+```graphql
+mutation {
+  register(
+    username: "johndoe"
+    email: "john@example.com"
+    password: "securepass123"
+  ) {
+    user {
+      id
+      username
+    }
+    token
+  }
+}
+```
+
+**Login:**
+```graphql
+mutation {
+  tokenAuth(username: "johndoe", password: "securepass123") {
+    token
+  }
+}
+```
+
 ## GraphQL Playground
 
 Access at: `http://localhost:8000/graphql/`
 
-### Sample Queries
+### Sample Queries & Mutations
 
 **List Posts:**
 
@@ -70,16 +108,61 @@ query {
 }
 ```
 
+**Create Post:**
+```graphql
+mutation {
+  createPost(content: "Hello world!", imageUrl: "https://...") {
+    post {
+      id
+      content
+      author {
+        username
+      }
+    }
+  }
+}
+```
+
+**Like Post:**
+```graphql
+mutation {
+  likePost(postId: "1") {
+    post {
+      likesCount
+    }
+    liked
+  }
+}
+```
+
+**Add Comment:**
+```graphql
+mutation {
+  createComment(postId: "1", content: "Nice post!") {
+    comment {
+      id
+      content
+    }
+  }
+}
+```
+
+## Testing
+```bash
+python manage.py test
+```
+
 ## Current Status
 
-✅ Day 1: Project setup, models, database schema  
-✅ Day 2: GraphQL integration, queries working
+✅ Day 1: Project setup, models  
+✅ Day 2: GraphQL queries  
+✅ Day 3: Authentication & mutations
 
 ## Next Steps
 
-- Authentication (JWT)
-- Mutations (create post, comment, like, share)
-- Performance optimization
+- Performance optimization (caching, query optimization)
+- Real-time updates
+- Deployment
 
 ## Troubleshooting
 
