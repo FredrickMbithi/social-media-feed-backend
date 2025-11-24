@@ -162,3 +162,24 @@ GRAPHQL_JWT = {
     'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=30),
     'JWT_AUTH_HEADER_PREFIX': 'JWT',
 }
+
+# Redis Cache Configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/1'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'PARSER_CLASS': 'redis.connection.HiredisParser',
+            'CONNECTION_POOL_KWARGS': {'max_connections': 50},
+            'SOCKET_CONNECT_TIMEOUT': 5,
+            'SOCKET_TIMEOUT': 5,
+        },
+        'KEY_PREFIX': 'socialfeed',
+        'TIMEOUT': 300,  # 5 minutes default
+    }
+}
+
+# Session engine (use Redis for sessions too)
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
