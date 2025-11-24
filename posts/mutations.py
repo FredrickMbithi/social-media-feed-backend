@@ -1,6 +1,7 @@
 import graphene
 from graphql_jwt.decorators import login_required
 from django.db.models import F
+from django.db import transaction
 from .models import Post, Comment, Interaction
 from .types import PostType, CommentType
 from .cache_utils import CacheManager
@@ -17,6 +18,7 @@ class CreatePost(graphene.Mutation):
     
     @login_required
     @rate_limit(group='create_post', rate='5/m')  # 5 posts per minute
+    @transaction.atomic
     def mutate(self, info, content, image_url=None):
         user = info.context.user
         
@@ -51,6 +53,7 @@ class UpdatePost(graphene.Mutation):
         image_url = graphene.String()
     
     @login_required
+    @transaction.atomic
     def mutate(self, info, post_id, content=None, image_url=None):
         user = info.context.user
         
@@ -89,6 +92,7 @@ class DeletePost(graphene.Mutation):
         post_id = graphene.ID(required=True)
     
     @login_required
+    @transaction.atomic
     def mutate(self, info, post_id):
         user = info.context.user
         
@@ -122,13 +126,14 @@ class CreateComment(graphene.Mutation):
     
     @login_required
     @rate_limit(group='create_comment', rate='10/m')  # 10 comments per minute
+    @transaction.atomic
     def mutate(self, info, post_id, content):
         user = info.context.user
         
         # Validation
         if not content or len(content.strip()) == 0:
             raise Exception('Comment content cannot be empty')
-        
+
         if len(content) > 1000:
             raise Exception('Comment too long (max 1000 characters)')
         
@@ -161,6 +166,7 @@ class DeleteComment(graphene.Mutation):
         comment_id = graphene.ID(required=True)
     
     @login_required
+    @transaction.atomic
     def mutate(self, info, comment_id):
         user = info.context.user
         
@@ -194,6 +200,7 @@ class LikePost(graphene.Mutation):
     
     @login_required
     @rate_limit(group='like_post', rate='20/m')  # 20 likes per minute
+    @transaction.atomic
     def mutate(self, info, post_id):
         user = info.context.user
         
@@ -238,6 +245,7 @@ class SharePost(graphene.Mutation):
         post_id = graphene.ID(required=True)
     
     @login_required
+    @transaction.atomic
     def mutate(self, info, post_id):
         user = info.context.user
         
