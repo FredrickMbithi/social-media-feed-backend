@@ -3,6 +3,7 @@ from graphql_jwt.decorators import login_required
 from django.db.models import F
 from .models import Post, Comment, Interaction
 from .types import PostType, CommentType
+from .cache_utils import CacheManager
 
 
 class CreatePost(graphene.Mutation):
@@ -31,6 +32,10 @@ class CreatePost(graphene.Mutation):
             image_url=image_url
         )
         
+        # Invalidate caches
+        CacheManager.invalidate_posts_lists()
+        CacheManager.invalidate_user_posts(user.id)
+
         return CreatePost(post=post)
 
 
@@ -66,6 +71,10 @@ class UpdatePost(graphene.Mutation):
             post.image_url = image_url
         
         post.save()
+        # Invalidate caches
+        CacheManager.invalidate_post(post_id)
+        CacheManager.invalidate_posts_lists()
+
         return UpdatePost(post=post)
 
 
@@ -90,7 +99,14 @@ class DeletePost(graphene.Mutation):
         if post.author != user:
             raise Exception('You can only delete your own posts')
         
+        author_id = post.author_id
         post.delete()
+        
+        # Invalidate caches
+        CacheManager.invalidate_post(post_id)
+        CacheManager.invalidate_posts_lists()
+        CacheManager.invalidate_user_posts(author_id)
+
         return DeletePost(success=True, message='Post deleted successfully')
 
 
@@ -204,6 +220,8 @@ class LikePost(graphene.Mutation):
             liked = False
         
         post.refresh_from_db()
+        # Invalidate post cache
+        CacheManager.invalidate_post(post_id)
         return LikePost(post=post, liked=liked)
 
 
