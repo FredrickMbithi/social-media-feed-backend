@@ -10,14 +10,16 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
-from pathlib import Path
 import os
 import warnings
-from dotenv import load_dotenv
 from datetime import timedelta
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
+from pathlib import Path
+
 import dj_database_url
+import sentry_sdk
+from dotenv import load_dotenv
+from sentry_sdk.integrations.django import DjangoIntegration
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -120,7 +122,9 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.getenv("DB_NAME", "socialfeed_db"),
         "USER": os.getenv("DB_USER", "postgres"),
-        "PASSWORD": os.getenv("DB_PASSWORD", os.getenv("POSTGRES_PASSWORD", "postgres")),
+        "PASSWORD": os.getenv(
+            "DB_PASSWORD", os.getenv("POSTGRES_PASSWORD", "postgres")
+        ),
         "HOST": os.getenv("DB_HOST", "localhost"),
         "PORT": os.getenv("DB_PORT", "5432"),
     }
@@ -241,7 +245,5 @@ if "DATABASE_URL" in os.environ:
 db_user = DATABASES["default"].get("USER")
 if db_user == "root":
     override = os.getenv("DB_USER_OVERRIDE", "postgres")
-    warnings.warn(
-        "Detected DB_USER='root'. Overriding to '%s' for safety." % override
-    )
+    warnings.warn("Detected DB_USER='root'. Overriding to '%s' for safety." % override)
     DATABASES["default"]["USER"] = override

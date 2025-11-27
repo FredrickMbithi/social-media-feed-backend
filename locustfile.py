@@ -43,7 +43,7 @@ class GraphQLUser(HttpUser):
         # build content separately to avoid overly long single line
         content_text = f"load test {random.randint(1, 99999)}"
         query = (
-            "mutation { createPost(content: \"" + content_text + "\") { post { id } } }"
+            'mutation { createPost(content: "' + content_text + '") { post { id } } }'
         )
         self.client.post(
             "/graphql/",

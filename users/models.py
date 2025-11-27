@@ -1,2 +1,1 @@
-
 # Users models (none yet)
