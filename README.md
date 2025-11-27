@@ -11,7 +11,7 @@ Real-time social media feed backend with GraphQL API.
 
 ## Setup
 
-```bash
+`````bash
 # Clone and setup
 ````markdown
 # Social Media Feed Backend - GraphQL API
@@ -46,7 +46,7 @@ python manage.py seed_data
 
 # Run server
 python manage.py runserver
-```
+`````
 
 ## Authentication
 
@@ -61,6 +61,7 @@ All mutations require JWT authentication. Include the token in headers:
 ### Register & Login
 
 **Register:**
+
 ```graphql
 mutation {
   register(
@@ -78,6 +79,7 @@ mutation {
 ```
 
 **Login:**
+
 ```graphql
 mutation {
   tokenAuth(username: "johndoe", password: "securepass123") {
@@ -125,6 +127,7 @@ query {
 ```
 
 **Create Post:**
+
 ```graphql
 mutation {
   createPost(content: "Hello world!", imageUrl: "https://...") {
@@ -140,6 +143,7 @@ mutation {
 ```
 
 **Like Post:**
+
 ```graphql
 mutation {
   likePost(postId: "1") {
@@ -152,6 +156,7 @@ mutation {
 ```
 
 **Add Comment:**
+
 ```graphql
 mutation {
   createComment(postId: "1", content: "Nice post!") {
@@ -164,6 +169,7 @@ mutation {
 ```
 
 ## Testing
+
 ```bash
 python manage.py test
 ```
@@ -213,4 +219,6 @@ Live demo: https://socialfeed-backend.onrender.com/
 Build: ![CI](https://github.com/FredrickMbithi/social-media-feed-backend/workflows/CI%20Pipeline/badge.svg)
 Deploy: ![CD](https://github.com/FredrickMbithi/social-media-feed-backend/workflows/CD%20Pipeline/badge.svg)
 
-````
+```
+
+```
