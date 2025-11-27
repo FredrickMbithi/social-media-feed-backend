@@ -27,8 +27,16 @@ jobs:
 
       - name: Notify deployment (Slack)
         if: always()
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          text: "Deployment to production completed!"
-          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+        run: |
+          # Send a simple notification to Slack via the incoming webhook URL.
+          # We avoid marketplace action inputs here to prevent schema validation warnings.
+          if [ -n "$SLACK_WEBHOOK" ]; then
+            curl -s -X POST -H 'Content-type: application/json' \
+              --data "{\"text\": \"Deployment to production completed for service ${RENDER_SERVICE_ID}\"}" \
+              "$SLACK_WEBHOOK" || true
+          else
+            echo "No SLACK_WEBHOOK configured; skipping notification."
+          fi
