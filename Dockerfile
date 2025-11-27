@@ -39,12 +39,12 @@ RUN chmod +x /app/scripts/entrypoint.sh
 # when launching the app inside the entrypoint.)
 RUN useradd -m appuser && chown -R appuser /app
 
-# Expose port
+# Expose port (default 8000; bind may be overridden at runtime via $PORT)
 EXPOSE 8000
 
-# Health Check
+# Health Check (uses $PORT at runtime)
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health/ || exit 1
+    CMD sh -c 'curl -f "http://localhost:${PORT:-8000}/health/" || exit 1'
 
 # Entrypoint (runs migrations, collects static and starts the app)
 ENTRYPOINT ["/app/scripts/entrypoint.sh"]

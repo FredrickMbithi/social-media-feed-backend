@@ -40,7 +40,7 @@ DEBUG = os.getenv('DJANGO_DEBUG', os.getenv('DEBUG', 'False')).lower() in ('1', 
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "web",
+    "social-media-feed-backend-web-1"
     "nginx",
 ]
 

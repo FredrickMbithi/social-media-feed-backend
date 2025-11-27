@@ -5,7 +5,8 @@ set -e
 
 # Default settings
 APP_MODULE="socialfeed.wsgi:application"
-GUNICORN_BIND="0.0.0.0:8000"
+# Bind to $PORT if provided by the hosting environment (Render, Cloud providers)
+GUNICORN_BIND="0.0.0.0:${PORT:-8000}"
 GUNICORN_WORKERS=${GUNICORN_WORKERS:-3}
 
 echo "Waiting for dependent services (db/redis) if needed..."
