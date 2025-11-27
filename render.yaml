@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: socialfeed-backend
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    branch: main
+    healthCheckPath: /health/
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: socialfeed-backend.onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://socialfeed-backend.onrender.com
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    databases:
+      - name: socialfeed-db
+        databaseName: socialfeed_db
+        user: socialfeed_user
+        plan: free
+services:
+  - type: redis
+    name: socialfeed-redis
+    plan: free
+    region: oregon
+    maxmemoryPolicy: allkeys-lru
