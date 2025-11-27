@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+import warnings
 from dotenv import load_dotenv
 from datetime import timedelta
 import sentry_sdk
@@ -119,7 +120,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.getenv("DB_NAME", "socialfeed_db"),
         "USER": os.getenv("DB_USER", "postgres"),
-        "PASSWORD": os.getenv("DB_PASSWORD", "22199690"),
+        "PASSWORD": os.getenv("DB_PASSWORD", os.getenv("POSTGRES_PASSWORD", "postgres")),
         "HOST": os.getenv("DB_HOST", "localhost"),
         "PORT": os.getenv("DB_PORT", "5432"),
     }
@@ -232,3 +233,15 @@ if "DATABASE_URL" in os.environ:
     DATABASES["default"] = dj_database_url.config(
         conn_max_age=600, conn_health_checks=True
     )
+
+# Safety guard: some CI environments or misconfigured DATABASE_URL values
+# may accidentally contain the DB user 'root', which typically does not exist
+# in our Postgres containers. If that happens, override to 'postgres'
+# unless an explicit `DB_USER_OVERRIDE` is provided.
+db_user = DATABASES["default"].get("USER")
+if db_user == "root":
+    override = os.getenv("DB_USER_OVERRIDE", "postgres")
+    warnings.warn(
+        "Detected DB_USER='root'. Overriding to '%s' for safety." % override
+    )
+    DATABASES["default"]["USER"] = override
