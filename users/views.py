@@ -1,3 +1,2 @@
-from django.shortcuts import render
+# Views for the `users` app (none required for API-only project)
 
-# Create your views here.

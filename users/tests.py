@@ -1,3 +1,2 @@
-from django.test import TestCase
+# Placeholder for user tests. Add actual tests as needed.
 
-# Create your tests here.
