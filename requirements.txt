@@ -76,3 +76,5 @@ typing_extensions==4.15.0
 tzdata==2025.2
 urllib3==2.5.0
 wheel==0.45.1
+dj-database-url
+locust==2.17.0
