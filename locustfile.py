@@ -5,12 +5,12 @@ import random
 class GraphQLUser(HttpUser):
     wait_time = between(1, 3)
 
-        def on_start(self):
-                username = f"loadtest_{random.randint(1000, 9999)}"
+    def on_start(self):
+        username = f"loadtest_{random.randint(1000, 9999)}"
         payload = {
             "query": f"""
             mutation {{
-                            register(username: "{username}", email: "{username}@test.com", password: "testpass123") {{
+              register(username: "{username}", email: "{username}@test.com", password: "testpass123") {{
                 token
               }}
             }}
