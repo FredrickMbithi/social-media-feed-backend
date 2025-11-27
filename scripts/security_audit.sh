@@ -1,3 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Simple security audit script: runs safety, bandit, and Django deploy checks.
+# Usage: `bash scripts/security_audit.sh`
+
+echo "==> Updating/installing audit tools (within current Python env)"
+python -m pip install --upgrade pip >/dev/null
+python -m pip install --upgrade safety bandit >/dev/null
+
+echo "==> Running safety (vulnerability database)"
+if command -v safety >/dev/null 2>&1; then
+  safety check || true
+else
+  echo "safety not available"
+fi
+
+echo "==> Running bandit (static analysis)"
+if command -v bandit >/dev/null 2>&1; then
+  bandit -r . || true
+else
+  echo "bandit not available"
+fi
+
+echo "==> Running Django deploy checks"
+python manage.py check --deploy || true
+
+echo "Security audit completed"
 #!/bin/bash
 
 echo "========================================="

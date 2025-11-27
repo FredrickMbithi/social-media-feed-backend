@@ -34,9 +34,10 @@ COPY . .
 USER root
 RUN chmod +x /app/scripts/entrypoint.sh
 
-# Create a non-root user for security
+# Create a non-root user for security (we keep default user as root so
+# the entrypoint can chown runtime-mounted volumes; we'll drop privileges
+# when launching the app inside the entrypoint.)
 RUN useradd -m appuser && chown -R appuser /app
-USER appuser
 
 # Expose port
 EXPOSE 8000

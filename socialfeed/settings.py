@@ -33,9 +33,11 @@ SECRET_KEY = os.getenv(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Read DEBUG from environment to allow different behavior in containers vs local dev
+DEBUG = os.getenv('DJANGO_DEBUG', os.getenv('DEBUG', 'False')).lower() in ('1', 'true', 'yes')
 
-ALLOWED_HOSTS = []
+# Allow setting ALLOWED_HOSTS via an environment variable (comma-separated)
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition

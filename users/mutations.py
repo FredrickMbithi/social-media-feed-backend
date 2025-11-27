@@ -4,6 +4,7 @@ from graphql_jwt.shortcuts import get_token
 from graphene_django import DjangoObjectType
 from django.contrib.auth.models import User
 from graphql_jwt.decorators import login_required
+from django.db import transaction
 
 
 class UserType(DjangoObjectType):
@@ -22,6 +23,7 @@ class RegisterUser(graphene.Mutation):
         email = graphene.String(required=True)
         password = graphene.String(required=True)
     
+    @transaction.atomic
     def mutate(self, info, username, email, password):
         # Validation
         if User.objects.filter(username=username).exists():
@@ -55,6 +57,7 @@ class UpdateUser(graphene.Mutation):
         password = graphene.String()
     
     @login_required
+    @transaction.atomic
     def mutate(self, info, email=None, password=None):
         user = info.context.user
         
