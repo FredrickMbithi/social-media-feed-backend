@@ -1,3 +1,2 @@
-from django.db import models
+# Users models (none yet)
 
-# Create your models here.

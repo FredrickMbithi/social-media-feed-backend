@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from graphene.test import Client
 from socialfeed.schema import schema
-from posts.models import Post, Comment
+from posts.models import Post
 
 
 class GraphQLTestCase(TestCase):
