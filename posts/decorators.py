@@ -21,6 +21,7 @@ def rate_limit(group=None, key="user_or_ip", rate="10/m", method="ALL"):
             # Execute limiter to potentially set request.limited flag
             limited_func(request)
 
+            # If limiter marked the request as limited, raise an error
             if getattr(request, "limited", False):
                 raise GraphQLError("Rate limit exceeded. Please try again later.")
 

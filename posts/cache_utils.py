@@ -1,8 +1,6 @@
 from django.core.cache import cache
 import hashlib
 
-
-
 class CacheManager:
     """Centralized cache management for posts"""
 

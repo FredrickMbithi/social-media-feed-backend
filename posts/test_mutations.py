@@ -1,8 +1,6 @@
 import pytest
 from django.contrib.auth.models import User
 from posts.models import Post
-
-
 @pytest.mark.django_db
 class TestAuthMutations:
 
