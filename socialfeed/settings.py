@@ -138,7 +138,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+# URL prefix for static files
+STATIC_URL = '/static/'
+
+# Where `collectstatic` will collect static files for production use.
+# In production this directory can be mounted as a Docker volume and served by Nginx.
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Media (user uploaded files)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
