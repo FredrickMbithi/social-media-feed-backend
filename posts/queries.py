@@ -1,7 +1,6 @@
 import graphene
-from graphene import relay
 from django.db.models import Q, Prefetch, Case, When
-from .types import PostType, CommentType
+from .types import PostType
 from .models import Post, Comment
 from .cache_utils import CacheManager, cache_post_data
 

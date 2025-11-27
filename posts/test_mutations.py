@@ -1,7 +1,6 @@
 import pytest
-from graphene.test import Client
 from django.contrib.auth.models import User
-from posts.models import Post, Comment
+from posts.models import Post
 
 
 @pytest.mark.django_db

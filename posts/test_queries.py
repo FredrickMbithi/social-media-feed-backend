@@ -1,6 +1,4 @@
 import pytest
-from graphene.test import Client
-from socialfeed.schema import schema
 from posts.models import Post
 
 
