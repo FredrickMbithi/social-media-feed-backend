@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: socialfeed
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: web
+          # IMPORTANT: In a real deployment, you would push your Docker image
+          # to a registry (like Docker Hub) and use that URL here.
+          # For local testing, we use the local tag.
+          image: socialfeed-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DB_HOST
+              value: db
+            - name: REDIS_URL
+              value: redis://redis:6379/0
+            - name: ALLOWED_HOSTS
+              value: "*"
+            - name: SECRET_KEY
+              value: "k8s-secret-key-change-me"
+            - name: DEBUG
+              value: "0"
+          livenessProbe:
+            httpGet:
+              path: /health/
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: socialfeed
+spec:
+  selector:
+    app: web
+  type: NodePort # Exposes the service on a static port on each Node
+  ports:
+    - port: 80
+      targetPort: 8000
+      nodePort: 30000 # We force port 30000 for easier local testing
