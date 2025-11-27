@@ -13,6 +13,22 @@ Real-time social media feed backend with GraphQL API.
 
 ```bash
 # Clone and setup
+````markdown
+# Social Media Feed Backend - GraphQL API
+
+Real-time social media feed backend with GraphQL API.
+
+## Tech Stack
+
+- Django 5.x
+- PostgreSQL
+- GraphQL (Graphene / graphene-django)
+- Python 3.10+
+
+## Setup
+
+```bash
+# Clone and setup
 git clone <your-repo-url>
 cd social-media-feed-backend
 python -m venv venv
@@ -187,3 +203,14 @@ Day 5: Caching & performance metrics
 ## License
 
 MIT (add LICENSE file if missing)
+
+## Live Demo
+
+Live demo: https://socialfeed-backend.onrender.com/
+
+## Badges
+
+Build: ![CI](https://github.com/FredrickMbithi/social-media-feed-backend/workflows/CI%20Pipeline/badge.svg)
+Deploy: ![CD](https://github.com/FredrickMbithi/social-media-feed-backend/workflows/CD%20Pipeline/badge.svg)
+
+````

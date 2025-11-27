@@ -1,4 +1,22 @@
 #!/usr/bin/env bash
+# Simple security audit script: safety, bandit, django check
+set -euo pipefail
+
+echo "Installing security tools..."
+pip install --quiet safety bandit
+
+echo "Running safety..."
+safety check || true
+
+echo "Running bandit..."
+bandit -r posts/ users/ socialfeed/ -ll || true
+
+echo "Running Django deploy checks..."
+pip install -r requirements.txt --quiet
+python manage.py check --deploy --settings=socialfeed.settings || true
+
+echo "Security audit complete."
+#!/usr/bin/env bash
 set -euo pipefail
 
 # Simple security audit script: runs safety, bandit, and Django deploy checks.
