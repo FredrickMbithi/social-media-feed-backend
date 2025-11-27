@@ -29,10 +29,17 @@ class Query(graphene.ObjectType):
             post_ids = cached
             # Preserve order using CASE WHEN
             preserved_order = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(post_ids)])
-            return Post.objects.filter(id__in=post_ids)\
+            posts_qs = Post.objects.filter(id__in=post_ids)\
                 .select_related('author')\
                 .prefetch_related(Prefetch('comments', queryset=Comment.objects.select_related('author').order_by('-created_at')))\
                 .order_by(preserved_order)
+
+            posts = list(posts_qs)
+            # If cache refers to posts that no longer exist (stale cache), invalidate and fallthrough
+            if not posts:
+                CacheManager.invalidate_posts_lists()
+            else:
+                return posts
         
         # Build optimized query
         # Avoid slicing a queryset before applying additional filters — instead
