@@ -1,5 +1,7 @@
 import pytest
 from posts.models import Post
+
+
 @pytest.mark.django_db
 class TestPostQueries:
 
