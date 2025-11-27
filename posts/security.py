@@ -39,14 +39,14 @@ class SecurityValidator:
         if not url:
             return None
         
-        # Basic URL validation
+        # Block dangerous protocols first (handle javascript:, data: etc.)
+        if url.lower().startswith(('javascript:', 'data:', 'vbscript:', 'file:')):
+            raise GraphQLError('Invalid URL protocol')
+
+        # Basic URL validation (must start with http:// or https://)
         url_pattern = r'^https?://.+'
         if not re.match(url_pattern, url):
             raise GraphQLError('Invalid URL format')
-        
-        # Block dangerous protocols
-        if url.lower().startswith(('javascript:', 'data:', 'vbscript:', 'file:')):
-            raise GraphQLError('Invalid URL protocol')
         
         # Check max length
         if len(url) > 2048:

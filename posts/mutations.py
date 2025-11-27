@@ -96,7 +96,6 @@ class DeletePost(graphene.Mutation):
     class Arguments:
         post_id = graphene.ID(required=True)
     
-    @login_required
     @transaction.atomic
     def mutate(self, info, post_id):
         user = info.context.user

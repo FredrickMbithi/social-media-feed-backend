@@ -1,5 +1,6 @@
 import graphene
 import graphql_jwt
+from graphql_jwt.shortcuts import get_token
 from graphene_django import DjangoObjectType
 from django.contrib.auth.models import User
 from graphql_jwt.decorators import login_required
@@ -40,7 +41,7 @@ class RegisterUser(graphene.Mutation):
         )
         
         # Generate token
-        token = graphql_jwt.shortcuts.get_token(user)
+        token = get_token(user)
         
         return RegisterUser(user=user, token=token)
 

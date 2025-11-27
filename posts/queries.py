@@ -35,8 +35,10 @@ class Query(graphene.ObjectType):
                 .order_by(preserved_order)
         
         # Build optimized query
+        # Avoid slicing a queryset before applying additional filters — instead
+        # order comments here and limit them later if necessary when serializing.
         qs = Post.objects.select_related('author').prefetch_related(
-            Prefetch('comments', queryset=Comment.objects.select_related('author')[:5])
+            Prefetch('comments', queryset=Comment.objects.select_related('author').order_by('-created_at'))
         )
         
         # Filters
