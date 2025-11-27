@@ -36,8 +36,13 @@ SECRET_KEY = os.getenv(
 # Read DEBUG from environment to allow different behavior in containers vs local dev
 DEBUG = os.getenv('DJANGO_DEBUG', os.getenv('DEBUG', 'False')).lower() in ('1', 'true', 'yes')
 
-# Allow setting ALLOWED_HOSTS via an environment variable (comma-separated)
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+# Allow hosts for local development and docker-compose services
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "web",
+    "nginx",
+]
 
 
 import sentry_sdk
