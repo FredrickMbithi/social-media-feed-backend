@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: socialfeed-config
+  namespace: socialfeed
+data:
+  DEBUG: "False"
+  DB_NAME: "socialfeed_db"
+  DB_USER: "postgres"
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  REDIS_URL: "redis://redis:6379/1"
+  ALLOWED_HOSTS: "localhost,127.0.0.1"
+  CORS_ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:8000"
+  ENVIRONMENT: "production"
