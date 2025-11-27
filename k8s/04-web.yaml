@@ -22,17 +22,11 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
-          env:
-            - name: DB_HOST
-              value: db
-            - name: REDIS_URL
-              value: redis://redis:6379/0
-            - name: ALLOWED_HOSTS
-              value: "*"
-            - name: SECRET_KEY
-              value: "k8s-secret-key-change-me"
-            - name: DEBUG
-              value: "0"
+          envFrom:
+            - configMapRef:
+                name: socialfeed-config
+            - secretRef:
+                name: socialfeed-secret
           livenessProbe:
             httpGet:
               path: /health/
@@ -53,3 +47,4 @@ spec:
     - port: 80
       targetPort: 8000
       nodePort: 30000 # We force port 30000 for easier local testing
+  externalTrafficPolicy: Cluster
