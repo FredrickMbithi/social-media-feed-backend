@@ -30,6 +30,10 @@ COPY --from=builder /install /usr/local
 # Copy application code
 COPY . .
 
+# Set permissions for entrypoint
+USER root
+RUN chmod +x /app/scripts/entrypoint.sh
+
 # Create a non-root user for security
 RUN useradd -m appuser && chown -R appuser /app
 USER appuser
@@ -40,6 +44,9 @@ EXPOSE 8000
 # Health Check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health/ || exit 1
+
+# Entrypoint
+ENTRYPOINT ["/app/scripts/entrypoint.sh"]
 
 # Command to run application
 CMD ["gunicorn", "socialfeed.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
